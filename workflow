@@ -33,6 +33,12 @@ jobs:
         name: node-app
         path: .    
   
+  jobs:
+  build:
+    name: TEST
+    runs-on: ubuntu-latest
+    
+    
   deploy-to-hom:
     runs-on: ubuntu-latest
     environment:
