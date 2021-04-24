@@ -1,19 +1,47 @@
-name: Projeto
+name: ProjetoFinal
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  app-name: projetofinal
 
 jobs:
-  job1:
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    name: BUILD
+    
     steps:
-    - run: date
-  job2:
-    runs-on: windows-latest
-    name: TEST
-    steps:
-    - run: date
+    - uses: actions/checkout@v2
+
+    - name: Set up Node.js version
+      uses: actions/setup-node@v1
+      with:
+        node-version: '14.x'
+
+    - name: npm install, build, and test
+      run: |
+        npm install
+        npm run build --if-present
+        npm run test --if-present
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v2
+      with:
+        name: node-app
+        path: .    
+  
+  deploy-to-hom:
+    runs-on: ubuntu-latest
+    environment:
+      name: 'HOM'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+  deploy-to-production:
+    runs-on: ubuntu-latest
+    needs: deploy-to-hom
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
